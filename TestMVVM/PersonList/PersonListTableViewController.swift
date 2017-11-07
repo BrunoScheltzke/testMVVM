@@ -17,6 +17,17 @@ class PersonListTableViewController: UITableViewController {
 
         personListViewModel = PersonListViewModel(personManager: PersonManager())
         
+        personListViewModel.changeCompletion = { (changeEvent) in
+            switch  changeEvent {
+            case .add(let index):
+                self.tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            case .edit(let index):
+                self.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            default:
+                break
+            }
+        }
+        
         personListViewModel.fetchData {
             tableView.reloadData()
         }
@@ -43,13 +54,6 @@ class PersonListTableViewController: UITableViewController {
         performSegue(withIdentifier: "goToPersonDetail", sender: person)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        personListViewModel.fetchData {
-            tableView.reloadData()
-        }
-    }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         performSegue(withIdentifier: "goToPersonDetail", sender: nil)
@@ -64,6 +68,7 @@ class PersonListTableViewController: UITableViewController {
         
         if segue.identifier == "goToPersonDetail", let detailViewController = segue.destination as? AddEditPersonViewController {
             if let sender = sender as? Person {
+
                 detailViewController.addEditPersonViewModel = AddEditPersonViewModel(personManager: personListViewModel.personManager, person: sender)
             } else {
                 detailViewController.addEditPersonViewModel = AddEditPersonViewModel(personManager: personListViewModel.personManager)

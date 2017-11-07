@@ -8,7 +8,16 @@
 
 import Foundation
 
+protocol PersonManagerDelegate {
+    func add(person: Person)
+    func edit(person: Person)
+}
+
 class PersonManager {
+    
+    var changeCompletion: ChangeCompletion?
+    
+    var delegate: PersonManagerDelegate!
     
     var persons = [Person(id: "orhvohdirv", name: "Mad Max")]
     
@@ -17,13 +26,16 @@ class PersonManager {
     }
     
     func save(person: Person, completion: (Result<Person>) -> Void) {
+        //creating new one
         if person.id.isEmpty {
             let newPerson = Person(id: UUID().description, name: person.name)
             persons.append(newPerson)
+            delegate.add(person: newPerson)
             completion(.sucess(newPerson))
-        } else {
+        } else {   //editing
             if let index = persons.index(where: { $0.id == person.id }) {
                 persons[index] = person
+                delegate.edit(person: person)
                 completion(.sucess(person))
             } else {
                 completion(.error(fatalError("fez merda") as! Error))
